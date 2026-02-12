@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="Checklist de Oficina - App Offline com PDF">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
+   <title id="titulo-pagina">Checklist de Entrada – Oficina</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- MÓDULO FIREBASE -->
+    <script type="module" src="firebase_app.js"></script>
+</head>
+<body>
+    <div class="container">
+       <div class="header">
+    <div class="logo-container">
+        <img id="logo-oficina" src="logo.png" alt="Logo da Oficina">
+    </div>
+    <div class="header-content">
+        <!-- ✅ NEUTRO - PREENCHER NO CONFIG.JS -->
+        <h1 id="nome-oficina">OFICINA</h1>
+        <p id="subtitulo-oficina">Checklist de entrada e inspeção veicular</p>
+        <div class="contato-info">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+            <span id="telefone-oficina">(00) 00000-0000</span>
+        </div>
+        <div class="endereco-oficina" id="endereco-oficina">
+            ENDEREÇO DA OFICINA
+        </div>
+        <div class="cnpj-oficina" id="cnpj-oficina">
+    CNPJ: 00.000.000/0000-00
+</div>
+
+
+                <div class="status-sync">
+                    <div class="sync-dot" id="syncStatus"></div>
+                    <span id="syncText">Online</span>
+                </div>
+            </div>
+            <div class="header-badge">v3.1 PRO</div>
+        </div>
+<div class="tabs">
+    <button class="tab-button active" onclick="switchTab('novo-checklist')">➕ Novo Checklist</button>
+    <button class="tab-button" onclick="switchTab('orcamento')">💰 Peças & Serviços</button>
+    <button class="tab-button" onclick="switchTab('fotos')">📸 Fotos</button>
+    <button class="tab-button" onclick="switchTab('resumo'); atualizarResumoOS()">📄 Resumo</button>
+    <button class="tab-button" onclick="switchTab('historico')">📋 Histórico</button>
+    <button class="tab-button" onclick="switchTab('relatorios')">📊 Relatórios</button>
+</div>
+        
+        <!-- BARRA FIXA DE INFORMAÇÕES DA OS -->
+<div class="os-info-bar" style="
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+">
+    <div style="font-size: 13px; font-weight: 600; color: #555;">
+        🛠️ ORDEM DE SERVIÇO ATUAL
+    </div>
+    <div id="barraFixaOS" style="
+        font-size: 18px; 
+        font-weight: 900; 
+        color: var(--color-primary); 
+        letter-spacing: 1px;
+    ">
+        -
+    </div>
+</div>
+
+
+
+        <!-- ABA PRINCIPAL - CHECKLIST -->
+        <div id="novo-checklist" class="tab-content active">
+            <div class="content">
+                <div id="successMessage" class="alert alert-success"></div>
+                <div id="errorMessage" class="alert alert-error"></div>
+                <div id="infoMessage" class="alert alert-info"></div>
+
+               <form id="checklistForm" class="wizard-form">
+
+    <!-- BARRA DE PROGRESSO DO WIZARD -->
+    <div class="wizard-progress">
+        <div class="step-indicator active" onclick="showStep(1)" data-step="1">1. Veículo</div>
+        <div class="step-indicator" onclick="showStep(2)" data-step="2">2. Inspeção</div>
+        <div class="step-indicator" onclick="showStep(3)" data-step="3">3. Cliente</div>
+    </div>
+
+    <!-- ================================================== -->
+    <!-- PASSO 1: INFORMAÇÕES DO VEÍCULO -->
+    <!-- ================================================== -->
+    <div class="wizard-step active" id="step1">
+        <div class="section-title">📋 INFORMAÇÕES DO VEÍCULO</div>
+
+        <!-- RESUMO FIXO DO VEÍCULO (VISUAL) -->
+        <div class="veiculo-resumo" id="resumoVeiculoPrincipal">
+            <div class="veiculo-resumo-pill">Placa: <strong id="resumoPlaca">-</strong></div>
+            <div class="veiculo-resumo-pill">Modelo: <strong id="resumoModelo">-</strong></div>
+            <div class="veiculo-resumo-pill">KM: <strong id="resumoKmEntrada">-</strong></div>
+            <div class="veiculo-resumo-pill">Data: <strong id="resumoData">-</strong></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="placa">Placa *</label>
+                <input type="text" id="placa" name="placa" placeholder="ABC-1234" maxlength="8" style="text-transform: uppercase;">
+            </div>
+            <div class="form-group">
+                <label for="chassi">Chassi</label>
+                <input type="text" id="chassi" name="chassi" placeholder="17 dígitos" maxlength="17">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="modelo">Modelo</label>
+                <input type="text" id="modelo" name="modelo" placeholder="Ex: Fiat Uno">
+            </div>
+            <div class="form-group">
+                <label for="km_entrada">KM Entrada</label>
+                <input type="text" id="km_entrada" name="km_entrada" placeholder="150.000">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="data">Data Entrada</label>
+                <input type="date" id="data" name="data">
+            </div>
+            <div class="form-group">
+                <label for="hora">Hora Entrada</label>
+                <input type="time" id="hora" name="hora">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="combustivel">Nível Combustível</label>
+                <select id="combustivel" name="combustivel">
+                    <option value="">Selecione...</option>
+                    <option value="cheio">Cheio</option>
+                    <option value="meio">Meio</option>
+                    <option value="1/4">1/4</option>
+                    <option value="vazio">Vazio</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="km_saida">KM Saída</label>
+                <input type="text" id="km_saida" name="km_saida" placeholder="150.500">
+            </div>
+        </div>
+
+        <!-- BOTÕES DE NAVEGAÇÃO -->
+        <div class="wizard-buttons right">
+            <button type="button" class="btn-secondary" onclick="limparFormulario()">🗑️ Limpar</button>
+            <button type="button" class="btn-primary" onclick="nextStep(2)">Próximo ➡️</button>
+        </div>
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- PASSO 2: INSPEÇÃO E CARACTERÍSTICAS -->
+    <!-- ================================================== -->
+    <div class="wizard-step" id="step2">
+        <div class="section-title">🔍 INSPEÇÃO VISUAL</div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">🔧 ACESSÓRIOS OBRIGATÓRIOS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="estepe" name="equipamentos" value="ESTEPE"><label for="estepe">ESTEPE</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="macaco" name="equipamentos" value="MACACO"><label for="macaco">MACACO</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="chave_roda" name="equipamentos" value="CHAVE DE RODA"><label for="chave_roda">CHAVE DE RODA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="triangulo" name="equipamentos" value="TRIÂNGULO"><label for="triangulo">TRIÂNGULO</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">⛽ TIPO COMBUSTÍVEL</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="flex" name="equipamentos" value="FLEX"><label for="flex">FLEX</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="gasolina" name="equipamentos" value="GASOLINA"><label for="gasolina">GASOLINA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="etanol" name="equipamentos" value="ETANOL"><label for="etanol">ETANOL</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="gnv" name="equipamentos" value="GNV"><label for="gnv">GNV</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="diesel" name="equipamentos" value="DIESEL"><label for="diesel">DIESEL</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">🔊 ELETRÔNICOS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="radio" name="equipamentos" value="RÁDIO / MULTIMÍDIA"><label for="radio">RÁDIO / MULTIMÍDIA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="alarme_corta" name="equipamentos" value="ALARME / CORTA CORRENTE"><label for="alarme_corta">ALARME / CORTA CORRENTE</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="antena" name="equipamentos" value="ANTENA"><label for="antena">ANTENA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="acendedor" name="equipamentos" value="ACENDEDOR/TOMADA 12V"><label for="acendedor">ACENDEDOR/TOMADA 12V</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">⚡ ELÉTRICOS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="vidro_eletrico" name="equipamentos" value="VIDRO ELÉTRICO"><label for="vidro_eletrico">VIDRO ELÉTRICO</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="trava_eletrica" name="equipamentos" value="TRAVA ELÉTRICA"><label for="trava_eletrica">TRAVA ELÉTRICA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="buzina" name="equipamentos" value="BUZINA"><label for="buzina">BUZINA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="bateria" name="equipamentos" value="BATERIA"><label for="bateria">BATERIA</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">🛞 RODAS & PÁRA-BRISAS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="calotas" name="equipamentos" value="CALOTAS"><label for="calotas">CALOTAS</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="rodas_liga" name="equipamentos" value="RODAS DE LIGA"><label for="rodas_liga">RODAS DE LIGA</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="roda_ferro" name="equipamentos" value="RODA DE FERRO"><label for="roda_ferro">RODA DE FERRO</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="para_brisa" name="equipamentos" value="PARABRISA TRINCADO"><label for="para_brisa">PÁRA BRISA TRINCADO</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">📦 DEMAIS ACESSÓRIOS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="extintor" name="equipamentos" value="EXTINTOR"><label for="extintor">EXTINTOR</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="protetor_carter" name="equipamentos" value="PROTETOR DE CARTER"><label for="protetor_carter">PROTETOR DE CARTER</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="chave_secreta" name="equipamentos" value="CHAVE SEGREDO (RODA)"><label for="chave_secreta">CHAVE SEGREDO (RODA)</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="tapetes" name="equipamentos" value="TAPETES"><label for="tapetes">TAPETES</label></div>
+            </div>
+        </div>
+
+        <div class="equip-section">
+            <div class="equip-section-title">⭐ EQUIPAMENTOS PRINCIPAIS</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="ar" name="caracteristicas" value="AR"><label for="ar">AR</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="abs" name="caracteristicas" value="ABS"><label for="abs">ABS</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="airbag" name="caracteristicas" value="Air Bag"><label for="airbag">Air Bag</label></div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="equip-section" style="flex: 1; margin-top: 0;">
+                <div class="equip-section-title">🕹️ CÂMBIO</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" id="cambio_auto" name="cambio" value="Automático"><label for="cambio_auto">AUTOMÁTICO</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="cambio_manual" name="cambio" value="Manual"><label for="cambio_manual">MANUAL</label></div>
+                </div>
+            </div>
+
+            <div class="equip-section" style="flex: 1; margin-top: 0;">
+                <div class="equip-section-title">🚜 TRAÇÃO</div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item"><input type="checkbox" id="tracao_4x2" name="tracao" value="4x2"><label for="tracao_4x2">4x2</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="tracao_4x4" name="tracao" value="4x4"><label for="tracao_4x4">4x4</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row full">
+    <div class="form-group">
+        <label for="obsInspecao">Observações da inspeção</label>
+        <textarea id="obsInspecao" name="obsInspecao"
+                  placeholder="Ex.: Vazamento de óleo no motor, ar condicionado não gela, lanterna traseira quebrada..."
+                  style="height: 60px; min-height: 60px;"></textarea>
+    </div>
+</div>
+
+        <!-- BOTÕES DE NAVEGAÇÃO -->
+        <div class="wizard-buttons">
+            <button type="button" class="btn-secondary" onclick="prevStep(1)">⬅️ Voltar</button>
+            <button type="button" class="btn-primary" onclick="nextStep(3)">Próximo ➡️</button>
+        </div>
+    </div>
+
+
+    <!-- ================================================== -->
+    <!-- PASSO 3: DADOS DO CLIENTE E FINALIZAÇÃO -->
+    <!-- ================================================== -->
+    <div class="wizard-step" id="step3">
+        <div class="section-title">👤 DADOS DO CLIENTE</div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="nome_cliente">Nome *</label>
+                <input type="text" id="nome_cliente" name="nome_cliente" placeholder="Nome completo do cliente">
+            </div>
+            <div class="form-group">
+                <label for="cpf_cnpj">CPF / CNPJ</label>
+                <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00" maxlength="18">
+            </div>
+        </div>
+
+        <div class="form-row full">
+            <div class="form-group">
+                <label for="endereco_cliente">Endereço Completo</label>
+                <textarea id="endereco_cliente" name="endereco_cliente" placeholder="Rua, número, bairro, cidade - UF, CEP" style="height: 60px; min-height: 60px;"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="celular_cliente">Celular / WhatsApp *</label>
+                <input type="tel" id="celular_cliente" name="celular_cliente" placeholder="(31) 99999-9999">
+            </div>
+            <div class="form-group">
+                <label for="telefone2">Telefone 2 (opcional)</label>
+                <input type="tel" id="telefone2" name="telefone2" placeholder="(31) 9999-9999">
+            </div>
+        </div>
+
+        <div class="section-title">🔧 SERVIÇOS/SOLICITADOS</div>
+
+        <div class="form-row full">
+            <div class="form-group">
+                <label for="servicos">Descreva os serviços solicitados:</label>
+                <textarea id="servicos" name="servicos" placeholder="Ex: Troca de óleo e filtro, alinhamento e balanceamento..."></textarea>
+            </div>
+        </div>
+
+        <!-- BOTÕES DE NAVEGAÇÃO -->
+        <div class="wizard-buttons">
+            <button type="button" class="btn-secondary" onclick="prevStep(2)">⬅️ Voltar</button>
+<button type="button" class="btn-primary" onclick="switchTab('orcamento')">Ir para Peças & Serviços ➡️</button>
+        </div>
+    </div>
+
+</form>
+            </div>
+        </div>
+
+        <!-- ABA HISTÓRICO -->
+        <div id="historico" class="tab-content">
+            <div class="content">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar por placa, modelo ou cliente..." onkeyup="filtrarChecklists()">
+                     <!-- BOTÃO SINCRONIZAR AQUI -->
+                    <button class="btn-primary btn-small" id="btnSync" onclick="sincronizarChecklists()" style="background-color: #27ae60;">🔄 Sincronizar Nuvem</button>
+                    <button class="btn-secondary btn-small" onclick="ordenarChecklists()">📊 Ordenar</button>
+                </div>
+
+                <div id="checklistsList"></div>
+                <div id="emptyMessage" style="text-align: center; padding: 40px; color: #999;">
+                    <p style="font-size: 40px; margin-bottom: 10px;">📭</p>
+                    <p>Nenhum checklist salvo ainda. Crie um novo para começar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA RELATÓRIOS -->
+        <div id="relatorios" class="tab-content">
+            <div class="content">
+                <div class="section-title">📊 ESTATÍSTICAS GERAIS</div>
+                <div class="stats-box">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalChecklists">0</div>
+                        <div class="stat-label">Checklists Salvos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="checklistsMes">0</div>
+                        <div class="stat-label">Checklists Mês Atual</div>
+                    </div>
+                </div>
+
+                <div class="section-title">🚗 MARCAS MAIS ATENDIDAS</div>
+                <div id="graficoMarcas" style="margin-top: 20px;"></div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="exportarDados()">💾 Exportar Todos (JSON)</button>
+                    <button class="btn-danger" onclick="limparTodosDados()">🗑️ Limpar Histórico</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA ORÇAMENTO – PLANILHA DE PEÇAS & SERVIÇOS -->
+        <div id="orcamento" class="tab-content">
+            <div class="content">
+                <div class="section-title">💰 PEÇAS & SERVIÇOS</div>
+
+                <!-- RESUMO FIXO DO VEÍCULO TAMBÉM NA ABA DE PEÇAS -->
+                <div class="veiculo-resumo" id="resumoVeiculoOrcamento">
+                    <div class="veiculo-resumo-pill">Placa: <strong id="resumoPlaca2">-</strong></div>
+                    <div class="veiculo-resumo-pill">Modelo: <strong id="resumoModelo2">-</strong></div>
+                    <div class="veiculo-resumo-pill">Chassi: <strong id="resumoChassi2">-</strong></div>
+                    <div class="veiculo-resumo-pill">KM Entrada: <strong id="resumoKmEntrada2">-</strong></div>
+                    <div class="veiculo-resumo-pill">Complexidade: <strong id="resumoComplexidade">-</strong></div>
+                </div>
+
+                <!-- COMPLEXIDADE -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="complexidade">Tipo de evento</label>
+                        <select id="complexidade" name="complexidade">
+                            <option value="">Selecione...</option>
+                            <option value="Evento pequeno">Evento pequeno</option>
+                            <option value="Evento médio">Evento médio</option>
+                            <option value="Evento grande">Evento grande</option>
+                        </select>
+                    </div>
+                </div>
+
+<div class="form-row">
+    <div class="form-group">
+        <label>Tipo do Item:</label>
+        <div class="checkbox-group" style="margin-top: 5px;">
+            <div class="checkbox-item">
+                <input type="radio" id="tipoPeca" name="tipoItem" value="peca" checked>
+                <label for="tipoPeca">Peça</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="radio" id="tipoServico" name="tipoItem" value="servico">
+                <label for="tipoServico">Serviço</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-row two">
+    <div class="form-group">
+        <label for="descricaoItem">Descrição</label>
+        <textarea id="descricaoItem" rows="1" placeholder="Ex: Pastilha de Freio/Mão de obra (Enter)..."></textarea>
+    </div>
+    <div class="form-group">
+        <label for="valorItem">Valor (R$)</label>
+        <input type="number" id="valorItem" step="0.01" min="0" placeholder="0,00">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group">
+<button type="button" class="btn-primary" id="btnAdicionarItem" onclick="adicionarItemManual()">
+    ➕ Adicionar
+</button>
+
+    </div>
+</div>
+
+<div style="margin-top:20px;">
+    
+    <h4 style="border-bottom: 2px solid #0056b3; padding-bottom: 5px; color: #333;">🔩 Peças</h4>
+    <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom: 10px;">
+        <thead>
+            <tr style="background:#f7f7f7;">
+                <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
+                <th style="border:1px solid #ddd; padding:6px; text-align:right; width: 100px;">Valor</th>
+                <th style="border:1px solid #ddd; padding:6px; text-align:center; width: 50px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaPecas"></tbody>
+        <tfoot>
+            <tr>
+                <td style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold;">Total Peças:</td>
+                <td id="totalPecas" style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold; color: #0056b3;">R$ 0,00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h4 style="border-bottom: 2px solid #e41616; padding-bottom: 5px; color: #333; margin-top: 25px;">🔧 Serviços</h4>
+    <table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom: 10px;">
+        <thead>
+            <tr style="background:#f7f7f7;">
+                <th style="border:1px solid #ddd; padding:6px; text-align:left;">Descrição</th>
+                <th style="border:1px solid #ddd; padding:6px; text-align:right; width: 100px;">Valor</th>
+                <th style="border:1px solid #ddd; padding:6px; text-align:center; width: 50px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaServicos"></tbody>
+        <tfoot>
+            <tr>
+                <td style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold;">Total Serviços:</td>
+                <td id="totalServicos" style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold; color: #e41616;">R$ 0,00</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div style="background: #eee; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: right;">
+        <span style="font-size: 14px; font-weight: bold; color: #555;">TOTAL GERAL (Peças + Serviços):</span>
+        <div id="totalGeralFinal" style="font-size: 24px; font-weight: bold; color: #28a745;">R$ 0,00</div>
+    </div>
+
+</div>
+                <div class="action-buttons">
+<button type="button" class="btn-success" onclick="switchTab('resumo'); atualizarResumoOS()">📄 Ver Resumo & Imprimir</button>
+                </div>
+            </div>
+        </div>
+<div id="fotos" class="tab-content">
+    <div class="content">
+        <div class="section-title">📸 FOTOS DO VEÍCULO</div>
+
+        <div style="
+            background-color: #fff3cd; 
+            border: 1px solid #ffeeba; 
+            color: #856404; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            text-align: center;
+            font-size: 14px;
+        ">
+            <strong>⚠️ Atenção:</strong> As fotos são salvas <u>apenas neste dispositivo</u>!<br>
+            Para backup, envie para o <strong>WhatsApp</strong> ou salve no <strong>Google Drive</strong>.
+        </div>
+        
+        <div class="veiculo-resumo" id="resumoVeiculoFotos">
+            <div class="veiculo-resumo-pill">Placa: <strong id="resumoPlaca3">-</strong></div>
+            <div class="veiculo-resumo-pill">Modelo: <strong id="resumoModelo3">-</strong></div>
+            <div class="veiculo-resumo-pill">Chassi: <strong id="resumoChassi3">-</strong></div>
+            <div class="veiculo-resumo-pill">KM: <strong id="resumoKmFotos">-</strong></div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <button type="button" class="btn-primary" onclick="iniciarCamera()">📷 Tirar Foto</button>
+            </div>
+            <div class="form-group">
+                <input type="file" id="uploadFotos" multiple accept="image/*" onchange="adicionarFotos(event)">
+                <label for="uploadFotos" class="btn-secondary" style="cursor:pointer; padding:12px 24px; display:block; text-align:center;">📁 Galeria</label>
+            </div>
+        </div>
+
+        <div class="camera-container" style="display:none;">
+            <video id="cameraPreview" autoplay playsinline style="width:100%; max-width:400px; height:300px; border-radius:12px; border:3px solid #e41616; background:#000;"></video>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+                <button class="btn-success btn-small" onclick="tirarFoto()" id="btnTirarFoto" style="display:none;">📸 Capturar</button>
+                <button class="btn-secondary btn-small" onclick="pararCamera()">❌ Cancelar</button>
+            </div>
+        </div>
+
+        <div class="section-title">Galeria de Fotos (Máx 15)</div>
+        <div id="galeriaFotos" class="fotos-grid"></div>
+
+        <div class="action-buttons">
+            <button type="button" class="btn-success" onclick="gerarPDFFotos()">📄 PDF Fotos</button>
+            <button type="button" class="btn-danger" onclick="limparFotos()">🗑️ Limpar Fotos</button>
+        </div>
+    </div>
+</div>
+
+    </div>
+<div id="resumo" class="tab-content">
+  <div class="content">
+    
+    <div id="resumoContainer" class="os-paper">
+      
+      <div id="template-cabecalho" class="os-header">
+        <div class="os-header-left">
+          <img id="logoResumo" src="" alt="Logo" class="os-logo">
+          <div class="os-empresa-dados">
+            <div id="nomeOficinaResumo" class="os-oficina-nome">NOME DA OFICINA</div>
+            <div id="enderecoOficinaResumo" class="os-oficina-sub">Endereço da oficina</div>
+<div class="os-oficina-sub">
+    <img src="whatsapp.png" alt="WhatsApp" class="whatsapp-icon">
+    <span id="telefoneOficinaResumo">00 00000-0000</span>
+</div>
+            <div id="cnpjOficinaResumo" class="os-oficina-sub">CNPJ da oficina</div>
+          </div>
+        </div>
+        <div class="os-header-right">
+          <div class="os-label-os">ORDEM DE SERVIÇO</div>
+          <div id="osNumero" class="os-numero-os">00000000</div>
+        </div>
+      </div>
+
+      <div class="os-grid-2">
+        <div class="os-box">
+          <div class="os-box-title">CLIENTE</div>
+          <div class="os-line"><strong>Nome:</strong> <span id="rNomeCliente"></span></div>
+          <div class="os-line"><strong>CPF/CNPJ:</strong> <span id="rCpfCnpj"></span></div>
+          <div class="os-line"><strong>Tel:</strong> <span id="rCelular"></span></div>
+        </div>
+        <div class="os-box">
+          <div class="os-box-title">VEÍCULO</div>
+          <div class="os-line"><strong>Veículo:</strong> <span id="rModelo"></span> <span id="rPlaca" style="background:#eee; padding:0 4px; border-radius:3px; font-weight:bold;"></span></div>
+          <div class="os-line"><strong>Chassi:</strong> <span id="rChassi"></span></div>
+          <div class="os-line"><strong>KM:</strong> <span id="rKmEntrada"></span> | <strong>Comb:</strong> <span id="rCombustivel"></span></div>
+          <div class="os-line"><strong>Data:</strong> <span id="rEntradaDataHora"></span></div>
+        </div>
+      </div>
+
+      <div class="os-box mt-10">
+        <div class="os-box-title">SERVIÇOS SOLICITADOS</div>
+        <div id="rServicos" class="os-text-area"></div>
+      </div>
+
+      <div class="os-box mt-10">
+        <div class="os-box-title">INSPEÇÃO DE ENTRADA</div>
+        <div id="rChecklistBadges" class="os-badges-area">
+        </div>
+      </div>
+        
+<div class="os-box mt-10">
+    <div class="os-box-title">OBSERVAÇÕES DA INSPEÇÃO</div>
+    <div id="rObsInspecao" class="os-text-area">-</div>
+</div>
+
+       <div id="template-assinaturas" class="os-assinaturas">
+        <div class="os-assina-box">Assinatura do Cliente</div>
+        <div class="os-assina-box">Assinatura do Técnico</div>
+      </div>
+
+<div class="os-footer">
+    <span id="rodape-texto-1">Carregando...</span>
+</div>
+
+<div class="force-page-break"></div>
+
+
+<div class="os-header" id="header-pag2">
+</div>
+
+<div id="containerTabelasOrcamento">
+</div>
+
+      <div class="os-total-row">
+        <span>TOTAL GERAL:</span>
+        <span id="rTotalGeral" class="os-total-value">R$ 0,00</span>
+      </div>
+        
+<div class="os-assinaturas" id="assinaturas-pag2">
+    <div class="os-assina-box">Assinatura do Cliente</div>
+    <div class="os-assina-box">Assinatura do Técnico</div>
+</div>
+
+<div class="os-footer">
+    <span id="rodape-texto-2">Carregando...</span>
+</div>
+
+
+
+    </div>
+
+<div class="action-buttons no-pdf">
+      <button type="button" class="btn-success" onclick="gerarPDFResumo()">📥 Baixar PDF</button>
+       <button type="button" class="btn-primary" onclick="salvarChecklist()" style="background: #27ae60 !important;">💾 Salvar Completo</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- CARREGA TODA A LÓGICA DO ARQUIVO EXTERNO -->
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="checklist.js"></script>
+    
+<div class="os-footer" id="rRodape" style="position: fixed; bottom: 0; left: 0; right: 0; width: 100%; text-align: center; font-size: 10px; background: #f8f9fa; padding: 8px 12px; border-top: 2px solid var(--color-primary); z-index: 9999; box-sizing: border-box; font-family: Arial, sans-serif;">
+    <span id="rodape-texto">Developed by Hallz Branding 3199676-6963</span>
+</div>
+
+</body>
+</html>
