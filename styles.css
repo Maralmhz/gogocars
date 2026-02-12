@@ -10,7 +10,7 @@
     position: fixed;
     bottom: 16px;
     right: 16px;
-    background: #1a1a1a;  /* preto elegante */
+    background: #1a1a1a;  /* ✅ PRETO PURO */
     color: #ffffff;
     border: none;
     border-radius: 999px;
@@ -22,7 +22,6 @@
     box-shadow: 0 6px 14px rgba(0,0,0,0.3);
 }
 
-/* ajuste específico para celular */
 @media (max-width: 768px) {
     #btnSalvarChecklist {
         bottom: 12px;
@@ -32,11 +31,11 @@
     }
 }
 
-/* PALETA SÓBRIA E ELEGANTE */
+/* PALETA 100% PRETA/BRANCA */
 :root {
-    --color-primary: #1a1a1a;   /* preto elegante */
+    --color-primary: #1a1a1a;   
     --color-dark: #0d0d0d;
-    --color-light: #ffffff;     /* branco puro */
+    --color-light: #ffffff;     
     --color-text: #2d2d2d;
     --color-border: #e5e5e5;
     --color-success: #10b981;
@@ -75,7 +74,7 @@ body {
 }
 
 .header {
-    background: var(--color-light);  /* ✅ HEADER BRANCO */
+    background: var(--color-light);
     color: var(--color-primary);
     padding: 40px 30px;
     display: flex;
@@ -89,7 +88,7 @@ body {
     position: absolute;
     top: 20px;
     right: 30px;
-    background: var(--color-primary);
+    background: #1a1a1a;
     color: #ffffff;
     padding: 6px 14px;
     border-radius: 25px;
@@ -119,7 +118,7 @@ body {
     font-size: 32px;
     margin-bottom: 8px;
     font-weight: 800;
-    color: var(--color-primary);
+    color: #1a1a1a;
     letter-spacing: -0.02em;
 }
 
@@ -155,7 +154,7 @@ body {
 
 .cnpj-oficina {
     font-size: 12px;
-    color: var(--color-primary);
+    color: #1a1a1a;
     margin-top: 8px;
     font-weight: 500;
     opacity: 0.9;
@@ -221,15 +220,15 @@ body {
 }
 
 .tab-button:hover {
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
     background-color: #ffffff;
     transform: translateY(-1px);
 }
 
 .tab-button.active {
-    background-color: var(--color-primary);  /* ✅ BOTÕES PRETOS */
-    color: #ffffff;
-    border-color: var(--color-primary);
+    background: #1a1a1a !important;  /* ✅ PRETO PURO */
+    color: #ffffff !important;
+    border-color: #1a1a1a !important;
     box-shadow: 0 8px 25px rgba(26,26,26,0.2);
 }
 
@@ -246,7 +245,7 @@ body {
 }
 
 .section-title {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2d2d2d 100%);
+    background: #1a1a1a;  /* ✅ PRETO PURO */
     color: #ffffff;
     padding: 16px 20px;
     border-radius: 12px;
@@ -285,7 +284,6 @@ label {
     letter-spacing: 0.3px;
 }
 
-/* --- INPUTS ELEGANTE --- */
 input[type="text"],
 input[type="date"],
 input[type="time"],
@@ -309,7 +307,7 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
     background-color: #ffffff;
     box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.08);
     transform: translateY(-1px);
@@ -335,7 +333,6 @@ textarea {
     overflow: hidden;
 }
 
-/* --- CHECKBOXES MODERNOS --- */
 .checkbox-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -377,13 +374,13 @@ textarea {
 
 .checkbox-item label:hover {
     background-color: #f1f5f9;
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
 }
 
 .checkbox-item input:checked + label {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2d2d2d 100%);
+    background: #1a1a1a;  /* ✅ PRETO PURO */
     color: #ffffff;
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
     box-shadow: 0 8px 25px rgba(26, 26, 26, 0.25);
     transform: translateY(-2px);
 }
@@ -394,19 +391,19 @@ textarea {
 
 .equip-section-title {
     font-weight: 700;
-    color: var(--color-primary);
+    color: #1a1a1a;
     margin-bottom: 16px;
     font-size: 15px;
     padding: 12px 16px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: #f8fafc;
     border-radius: 8px;
-    border-left: 4px solid var(--color-primary);
+    border-left: 4px solid #1a1a1a;
 }
 
 .veiculo-resumo {
     margin: 20px 0 15px 0;
     padding: 16px 20px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     display: flex;
@@ -425,7 +422,7 @@ textarea {
 
 .veiculo-resumo-pill strong {
     font-weight: 700;
-    color: var(--color-primary);
+    color: #1a1a1a;
 }
 
 .quebra-pagina-antes {
@@ -433,7 +430,7 @@ textarea {
 }
 
 .checklist-item {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: #ffffff;
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
@@ -446,7 +443,7 @@ textarea {
 }
 
 .checklist-item:hover {
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
     box-shadow: 0 12px 40px rgba(26,26,26,0.12);
     transform: translateY(-2px);
 }
@@ -488,22 +485,22 @@ button {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2d2d2d 100%);  /* ✅ BOTÕES PRETOS */
-    color: #ffffff;
+    background: #1a1a1a !important;  /* ✅ PRETO PURO */
+    color: #ffffff !important;
     flex: 1;
     min-width: 160px;
     box-shadow: 0 8px 25px rgba(26,26,26,0.25);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #2d2d2d 0%, var(--color-primary) 100%);
+    background: #0d0d0d !important;  /* ✅ PRETO MAIS ESCURO */
     transform: translateY(-2px);
     box-shadow: 0 16px 40px rgba(26,26,26,0.35);
 }
 
 .btn-secondary {
     background-color: var(--color-light);
-    color: var(--color-primary);
+    color: #1a1a1a;
     flex: 1;
     min-width: 160px;
     border: 2px solid #e2e8f0;
@@ -511,20 +508,20 @@ button {
 }
 
 .btn-secondary:hover {
-    background: var(--color-primary);
+    background: #1a1a1a;
     color: #ffffff;
-    border-color: var(--color-primary);
+    border-color: #1a1a1a;
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, var(--color-error) 0%, #dc2626 100%);
+    background: var(--color-error);
     color: #ffffff;
     flex: 1;
     min-width: 160px;
 }
 
 .btn-danger:hover {
-    background: linear-gradient(135deg, #dc2626 0%, var(--color-error) 100%);
+    background: #dc2626;
 }
 
 .btn-small {
@@ -535,21 +532,21 @@ button {
 }
 
 .btn-success {
-    background: linear-gradient(135deg, var(--color-success) 0%, #059669 100%);
+    background: var(--color-success);
     color: #ffffff;
 }
 
 .btn-success:hover {
-    background: linear-gradient(135deg, #059669 0%, var(--color-success) 100%);
+    background: #059669;
 }
 
 .btn-warning {
-    background: linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%);
+    background: var(--color-warning);
     color: #ffffff;
 }
 
 .btn-warning:hover {
-    background: linear-gradient(135deg, #d97706 0%, var(--color-warning) 100%);
+    background: #d97706;
 }
 
 .alert {
@@ -598,7 +595,7 @@ button {
     cursor: pointer;
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
 }
 
@@ -673,7 +670,7 @@ button {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2d2d2d 100%);
+    background: #1a1a1a;  /* ✅ PRETO PURO */
     color: #ffffff;
     padding: 25px;
     border-radius: 16px;
@@ -695,7 +692,7 @@ button {
 }
 
 .section-card {
-    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    background: #ffffff;
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -706,7 +703,7 @@ button {
 .section-card .section-title {
     margin-top: 0;
     margin-bottom: 24px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2d2d2d 100%);
+    background: #1a1a1a;  /* ✅ PRETO PURO */
     color: #ffffff;
     padding: 16px 20px;
     border-radius: 12px;
@@ -754,7 +751,6 @@ button {
     }
 }
 
-/* Print styles mantidos iguais */
 @media print {
     body {
         padding: 0;
@@ -790,12 +786,11 @@ button {
     }
     .quebra-pagina-antes {
         margin-top: 50px !important;
-        border-top: 3px solid var(--color-primary);
+        border-top: 3px solid #1a1a1a;
         padding-top: 20px;
     }
 }
 
-/* Estilos OS Paper mantidos... */
 .os-header {
     position: running(header) !important;
     display: block !important;
@@ -810,7 +805,6 @@ button {
     display: none !important;
 }
 
-/* Resto dos estilos OS Paper permanecem iguais... */
 .os-paper {
     background: #fff;
     border: 1px solid #ccc;
@@ -822,12 +816,11 @@ button {
     color: #333;
 }
 
-/* Wizard styles */
 .wizard-progress {
     display: flex;
     justify-content: space-between;
     margin-bottom: 30px;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    background: #f1f5f9;
     border-radius: 50px;
     padding: 6px;
 }
@@ -844,7 +837,7 @@ button {
 }
 
 .step-indicator.active {
-    background: var(--color-primary);
+    background: #1a1a1a;
     color: #fff;
     box-shadow: 0 4px 16px rgba(26,26,26,0.3);
 }
