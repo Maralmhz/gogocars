@@ -19,8 +19,8 @@ window.OFICINA_CONFIG = {
     endereco: "R. D, 101 - inconfidentes, Contagem - MG, 32.260-630",
     cnpj: "13.458.714/0001-90",
     
-    // === CORES DOURADAS ===
-    corPrimaria: "#d4af37"
+    // === CORES pretas ===
+    corPrimaria: "#1a1a1a"
 };
 
 // Configuração Nuvem (GitHub Gist)
