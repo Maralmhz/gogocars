@@ -867,4 +867,22 @@ button {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* ✅ FORCE PRETO - SOBRESCREVE config.js */
+:root {
+    --color-primary: #1a1a1a !important;
+}
+
+.header h1,
+.header-content h1,
+#nome-oficina,
+.header-badge {
+    color: #1a1a1a !important;
+    background: #1a1a1a !important;
+}
+
+.cnpj-oficina {
+    color: #1a1a1a !important;
+}
+
 </style>
+
