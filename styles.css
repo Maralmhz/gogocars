@@ -78,7 +78,7 @@ body {
 }
 
 .header {
-    background: #030212;
+    background: #ffffff;
     color: var(--color-primary);
     padding: 30px 20px;
     display: flex;
@@ -1152,6 +1152,7 @@ text-align: left;
 }
 
 </style>
+
 
 
 
