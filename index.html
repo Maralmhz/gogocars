@@ -651,5 +651,16 @@
     <span id="rodape-texto">Developed by Hallz Branding 3199676-6963</span>
 </div>
 
+<!-- ===== ADICIONAR ANTES DO </body> ===== -->
+
+<!-- Cache Manager -->
+<script src="cache_manager.js"></script>
+
+<!-- Sync Manager -->
+<script type="module">
+    import { syncManager } from './sync_manager.js';
+    window.syncManager = syncManager;
+</script>
+
 </body>
 </html>
