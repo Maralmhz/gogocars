@@ -117,9 +117,263 @@ class CacheManager {
         return comprimidas;
     }
 
-    // ... (resto do código continua igual)
+    // ============================================
+    // OPERAÇÕES COM CHECKLISTS
+    // ============================================
+    
+    async salvarChecklist(checklist, comprimirFotos = true) {
+        await this.init();
+        
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Comprimir fotos se existirem
+                if (comprimirFotos && checklist.fotos && checklist.fotos.length > 0) {
+                    checklist.fotos = await this.comprimirFotos(checklist.fotos);
+                }
+                
+                // Adicionar timestamp de cache
+                checklist.cached_at = new Date().toISOString();
+                
+                const transaction = this.db.transaction(['checklists'], 'readwrite');
+                const store = transaction.objectStore('checklists');
+                const request = store.put(checklist);
+                
+                request.onsuccess = () => {
+                    console.log(`✅ Checklist ${checklist.id} salvo no cache`);
+                    resolve(checklist);
+                };
+                
+                request.onerror = () => reject(request.error);
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar no cache:', error);
+                reject(error);
+            }
+        });
+    }
+    
+    async buscarChecklist(id) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readonly');
+            const store = transaction.objectStore('checklists');
+            const request = store.get(id);
+            
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async listarChecklists(limite = 100) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readonly');
+            const store = transaction.objectStore('checklists');
+            const index = store.index('data_criacao');
+            const request = index.openCursor(null, 'prev'); // Ordenar por data DESC
+            
+            const checklists = [];
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                
+                if (cursor && checklists.length < limite) {
+                    checklists.push(cursor.value);
+                    cursor.continue();
+                } else {
+                    resolve(checklists);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async buscarPorPlaca(placa) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readonly');
+            const store = transaction.objectStore('checklists');
+            const index = store.index('placa');
+            const request = index.getAll(placa);
+            
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async deletarChecklist(id) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readwrite');
+            const store = transaction.objectStore('checklists');
+            const request = store.delete(id);
+            
+            request.onsuccess = () => {
+                console.log(`🗑️ Checklist ${id} removido do cache`);
+                resolve(true);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============================================
+    // SINCRONIZAÇÃO INTELIGENTE
+    // ============================================
+    
+    async getUltimaSincronizacao() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['metadata'], 'readonly');
+            const store = transaction.objectStore('metadata');
+            const request = store.get('ultima_sincronizacao');
+            
+            request.onsuccess = () => {
+                const data = request.result?.value || null;
+                resolve(data);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async setUltimaSincronizacao(timestamp = new Date().toISOString()) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['metadata'], 'readwrite');
+            const store = transaction.objectStore('metadata');
+            const request = store.put({ key: 'ultima_sincronizacao', value: timestamp });
+            
+            request.onsuccess = () => {
+                console.log(`⏰ Última sincronização: ${timestamp}`);
+                resolve(timestamp);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async buscarChecklistsModificadosApos(timestamp) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readonly');
+            const store = transaction.objectStore('checklists');
+            const index = store.index('atualizado_em');
+            const range = IDBKeyRange.lowerBound(timestamp, true);
+            const request = index.getAll(range);
+            
+            request.onsuccess = () => {
+                const modificados = request.result || [];
+                console.log(`🔄 ${modificados.length} checklist(s) modificado(s) desde ${timestamp}`);
+                resolve(modificados);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // ============================================
+    // ESTATÍSTICAS E UTILITÁRIOS
+    // ============================================
+    
+    async contarChecklists() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists'], 'readonly');
+            const store = transaction.objectStore('checklists');
+            const request = store.count();
+            
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+    
+    async obterTamanhoCache() {
+        if (!navigator.storage || !navigator.storage.estimate) {
+            return { usado: 'N/A', disponivel: 'N/A' };
+        }
+        
+        const estimate = await navigator.storage.estimate();
+        const usadoMB = (estimate.usage / 1024 / 1024).toFixed(2);
+        const disponivelMB = (estimate.quota / 1024 / 1024).toFixed(2);
+        
+        return {
+            usado: `${usadoMB} MB`,
+            disponivel: `${disponivelMB} MB`,
+            percentual: ((estimate.usage / estimate.quota) * 100).toFixed(1) + '%'
+        };
+    }
+    
+    async limparCache() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['checklists', 'fotos', 'metadata'], 'readwrite');
+            
+            transaction.objectStore('checklists').clear();
+            transaction.objectStore('fotos').clear();
+            transaction.objectStore('metadata').clear();
+            
+            transaction.oncomplete = () => {
+                console.log('🧹 Cache limpo com sucesso!');
+                resolve(true);
+            };
+            transaction.onerror = () => reject(transaction.error);
+        });
+    }
+    
+    async exibirEstatisticas() {
+        const total = await this.contarChecklists();
+        const tamanho = await this.obterTamanhoCache();
+        const ultimaSync = await this.getUltimaSincronizacao();
+        
+        console.log('📊 === ESTATÍSTICAS DO CACHE ===');
+        console.log(`📄 Total de checklists: ${total}`);
+        console.log(`💾 Espaço usado: ${tamanho.usado} de ${tamanho.disponivel} (${tamanho.percentual})`);
+        console.log(`⏰ Última sincronização: ${ultimaSync || 'Nunca'}`);
+        console.log('===================================');
+        
+        return { total, tamanho, ultimaSync };
+    }
 }
 
+// ============================================
+// INSTÂNCIA GLOBAL
+// ============================================
+
 const cacheManager = new CacheManager();
-if (typeof window !== 'undefined') window.cacheManager = cacheManager;
-console.log('✅ Cache Manager carregado [GogoCars]!');
+
+// Exportar para uso em módulos
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { CacheManager, cacheManager };
+}
+
+// Disponibilizar globalmente no navegador
+if (typeof window !== 'undefined') {
+    window.CacheManager = CacheManager;  // ✅ EXPORTA A CLASSE
+    window.cacheManager = cacheManager;  // ✅ EXPORTA A INSTÂNCIA
+    
+    // Comandos de debug
+    window.cacheDebug = {
+        estatisticas: () => cacheManager.exibirEstatisticas(),
+        listar: (limite) => cacheManager.listarChecklists(limite),
+        buscar: (id) => cacheManager.buscarChecklist(id),
+        limpar: () => cacheManager.limparCache(),
+        tamanho: () => cacheManager.obterTamanhoCache(),
+        ultimaSync: () => cacheManager.getUltimaSincronizacao()
+    };
+    
+    console.log('🔧 === CACHE MANAGER DISPONÍVEL ===');
+    console.log('cacheDebug.estatisticas()  - Ver estatísticas');
+    console.log('cacheDebug.listar(10)      - Listar checklists');
+    console.log('cacheDebug.tamanho()       - Ver uso de espaço');
+    console.log('cacheDebug.limpar()        - Limpar cache');
+    console.log('=====================================');
+}
+
+console.log('✅ Cache Manager carregado com sucesso!');
