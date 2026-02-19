@@ -1,5 +1,5 @@
 // ============================================
-// CONFIG.JS - GOGOCAR'S COM FIREBASE
+// CONFIG.JS - GOGOCAR'S COM FIREBASE NOVO
 // ============================================
 
 window.OFICINA_CONFIG = {
@@ -19,21 +19,20 @@ window.OFICINA_CONFIG = {
     endereco: "R. D, 101 - inconfidentes, Contagem - MG, 32.260-630",
     cnpj: "13.458.714/0001-90",
     
-    // === CORES ===
+    // === CORES AZUL ESCURO ===
     corPrimaria: "#0d2748"
 };
 
 // ============================================
-// CONFIGURAÇÃO FIREBASE (PRINCIPAL)
+// CONFIGURAÇÃO FIREBASE NOVO (oficina-hallz)
 // ============================================
 window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCpCfotfXYNpQu5o0fFbBvwOnQgU9PuYqU",
-    authDomain: "checklist-oficina-72c9e.firebaseapp.com",
-    databaseURL: "https://checklist-oficina-72c9e-default-rtdb.firebaseio.com",
-    projectId: "checklist-oficina-72c9e",
-    storageBucket: "checklist-oficina-72c9e.firebasestorage.app",
-    messagingSenderId: "305423384809",
-    appId: "1:305423384809:web:b152970a419848a0147078"
+    apiKey: "AIzaSyB6b4waUVzjwxWRCqxDGdtnMuQ8dPLnLRc",
+    authDomain: "oficina-hallz.firebaseapp.com",
+    projectId: "oficina-hallz",
+    storageBucket: "oficina-hallz.firebasestorage.app",
+    messagingSenderId: "597523417628",
+    appId: "1:597523417628:web:c928794dec224c0d29edd9"
 };
 
 // ============================================
