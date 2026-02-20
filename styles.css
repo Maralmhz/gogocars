@@ -798,6 +798,34 @@ button {
     table {
         page-break-inside: auto;
     }
+
+    /* 🔧 AJUSTE ESPECÍFICO PARA IMPRESSÃO FÍSICA */
+    .os-grid-2 {
+        gap: 8px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .os-box {
+        padding: 6px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .os-total-row {
+        margin-top: 8px !important;
+        padding: 8px 12px !important;
+    }
+    
+    .os-assinaturas {
+        margin-top: 25px !important;
+    }
+    
+    #containerTabelasOrcamento {
+        margin-bottom: 8px !important;
+    }
+    
+    .mt-10 {
+        margin-top: 8px !important;
+    }
     
 }
 
@@ -1151,8 +1179,18 @@ text-align: left;
     justify-content: flex-end;
 }
 
-</style>
+/* 🔧 LEGENDA DAS FOTOS - AJUSTE */
+.foto-legenda {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 11px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 6px;
+    background: white;
+}
 
+</style>
 
 
 

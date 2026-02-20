@@ -6,14 +6,15 @@ async function salvarComFirebase(checklistData) {
         const modulo = await import('./firebase_app.js');
         if (modulo && modulo.salvarNoFirebase) {
             await modulo.salvarNoFirebase(checklistData);
-            console.log("Salvo no Firebase!");
+            console.log("✅ Salvo no Firebase (estrutura organizada)!");
         }
     } catch (e) {
-        console.error("Erro ao carregar Firebase:", e);
-        throw e; // Propaga o erro para o checklist.js tratar
+        console.error("❌ Erro ao carregar Firebase:", e);
+        throw e;
     }
 }
 
+// FUNÇÃO OTIMIZADA - Busca apenas o mês atual (mais rápido e econômico)
 async function sincronizarChecklists() {
     const btn = document.getElementById('btnSync');
     const txtOriginal = btn.textContent;
@@ -22,8 +23,59 @@ async function sincronizarChecklists() {
 
     try {
         const modulo = await import('./firebase_app.js');
+        
+        // NOVO: Busca apenas o mês atual (economiza leituras!)
+        if (modulo && modulo.buscarChecklistsMesAtual) {
+            btn.textContent = '⏳ Baixando mês atual...';
+            const dadosNuvem = await modulo.buscarChecklistsMesAtual();
+            
+            if (dadosNuvem.length > 0) {
+                let local = JSON.parse(localStorage.getItem('checklists') || '[]');
+                const idsLocais = new Set(local.map(c => c.id));
+                
+                let novos = 0;
+                dadosNuvem.forEach(item => {
+                    if (!idsLocais.has(item.id)) {
+                        local.push(item);
+                        novos++;
+                    }
+                });
+
+                localStorage.setItem('checklists', JSON.stringify(local));
+                carregarHistorico();
+                
+                const hoje = new Date();
+                const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                alert(`✅ Sincronização concluída!\n\n${novos} novos checklists de ${mesNome}\nTotal na nuvem: ${dadosNuvem.length}`);
+            } else {
+                const mesAtual = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                alert(`📭 Nenhum checklist encontrado em ${mesAtual}.`);
+            }
+        }
+    } catch (e) {
+        console.error("Erro sync:", e);
+        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Configuração do Firebase no config.js");
+    } finally {
+        btn.textContent = txtOriginal;
+        btn.disabled = false;
+    }
+}
+
+// FUNÇÃO PARA SINCRONIZAR TODOS (opcional - usar raramente)
+async function sincronizarTodosChecklists() {
+    if (!confirm('⚠️ Sincronizar TODOS os checklists pode consumir muitas leituras do Firebase.\n\nDeseja continuar?')) {
+        return;
+    }
+    
+    const btn = document.getElementById('btnSync');
+    const txtOriginal = btn.textContent;
+    btn.textContent = '⏳ Baixando TUDO...';
+    btn.disabled = true;
+
+    try {
+        const modulo = await import('./firebase_app.js');
+        
         if (modulo && modulo.buscarChecklistsNuvem) {
-            btn.textContent = '⏳ Baixando...';
             const dadosNuvem = await modulo.buscarChecklistsNuvem();
             
             if (dadosNuvem.length > 0) {
@@ -40,14 +92,12 @@ async function sincronizarChecklists() {
 
                 localStorage.setItem('checklists', JSON.stringify(local));
                 carregarHistorico();
-                alert(`✅ Sincronização concluída! ${novos} novos checklists baixados.`);
-            } else {
-                alert("📭 Nenhum checklist encontrado na nuvem para esta oficina (ou erro de configuração).");
+                alert(`✅ Sincronização COMPLETA concluída!\n\n${novos} novos checklists baixados\nTotal: ${dadosNuvem.length}`);
             }
         }
     } catch (e) {
-        console.error("Erro sync:", e);
-        alert("❌ Erro ao sincronizar.\n\nDetalhe: " + (e.message || e) + "\n\nVerifique:\n1. Conexão com a Internet\n2. Token no arquivo config.js");
+        console.error("Erro sync completo:", e);
+        alert("❌ Erro ao sincronizar todos os dados: " + (e.message || e));
     } finally {
         btn.textContent = txtOriginal;
         btn.disabled = false;
@@ -197,11 +247,13 @@ async function salvarChecklist() {
         }
     }
 
-    const checklist = {
-        id: Date.now(),
-        data_criacao: new Date().toISOString(),
-        ...formData
-    };
+const checklist = {
+    id: Date.now(),
+    oficina_id: window.OFICINA_CONFIG.oficina_id || "sem_identificacao",
+    data_criacao: new Date().toISOString(),
+    ...formData
+};
+
     
     // Salva peças e serviços
     checklist.itensOrcamento = itensOrcamento || [];
@@ -220,11 +272,11 @@ async function salvarChecklist() {
         btnSalvar.disabled = true;
     }
     
-    // 2. TENTAR SALVAR NA NUVEM
+    // 2. TENTAR SALVAR NA NUVEM (estrutura organizada)
     let msgExtra = "";
     try {
         await salvarComFirebase(checklist);
-        msgExtra = " e na Nuvem!";
+        msgExtra = " e na Nuvem (organizado por pasta)!";
     } catch (e) {
         console.warn("Falha nuvem:", e);
         msgExtra = ".\n\n⚠️ AVISO: Salvo APENAS LOCALMENTE.\nErro ao salvar na nuvem: " + (e.message || "Erro desconhecido");
@@ -892,6 +944,9 @@ function atualizarResumoOS() {
         });
     }
 
+    // NOVA FUNCIONALIDADE: Galeria de 5 fotos miniatura com zoom - PRIMEIRA PÁGINA
+    renderizarGaleriaResumo();
+
     // Tabelas Orçamento
     const containerTabelas = document.getElementById('containerTabelasOrcamento');
     containerTabelas.innerHTML = '';
@@ -934,6 +989,89 @@ function atualizarResumoOS() {
     // Header Pág 2
     const headerPag2 = document.getElementById('header-pag2');
     if(headerPag2) headerPag2.innerHTML = document.getElementById('template-cabecalho').innerHTML;
+}
+
+// NOVA FUNÇÃO: Renderizar galeria de 5 fotos miniatura com zoom - MENOR (metade)
+function renderizarGaleriaResumo() {
+    // Remove galeria existente se houver
+    let galeriaExistente = document.getElementById('galeriaFotosResumo');
+    if (galeriaExistente) {
+        galeriaExistente.remove();
+    }
+
+    // Se não houver fotos, não adiciona nada
+    if (!fotosVeiculo || fotosVeiculo.length === 0) {
+        return;
+    }
+
+    // Pegar as 5 primeiras fotos
+    const fotosParaResumo = fotosVeiculo.slice(0, 5);
+
+    // Criar container da galeria
+    const galeriaDiv = document.createElement('div');
+    galeriaDiv.id = 'galeriaFotosResumo';
+    galeriaDiv.className = 'os-box mt-10';
+    galeriaDiv.innerHTML = '<div class="os-box-title" style="font-size: 10px; padding: 4px 8px;">📸 FOTOS DO VEÍCULO</div>';
+
+    // Grid de fotos - MENOR (metade do tamanho)
+    const gridFotos = document.createElement('div');
+    gridFotos.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        margin-top: 6px;
+        padding: 6px;
+    `;
+
+    fotosParaResumo.forEach((foto, index) => {
+        const fotoContainer = document.createElement('div');
+        fotoContainer.style.cssText = `
+            position: relative;
+            cursor: pointer;
+            border: 1px solid #e41616;
+            border-radius: 4px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        `;
+
+        const img = document.createElement('img');
+        img.src = foto.dataURL;
+        img.alt = `Foto ${index + 1}`;
+        img.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        `;
+
+        // Adicionar evento de clique para zoom
+        fotoContainer.onclick = () => abrirFotoGrande(foto.dataURL);
+
+        // Ícone de zoom - MENOR
+        const zoomIcon = document.createElement('div');
+        zoomIcon.innerHTML = '🔍';
+        zoomIcon.style.cssText = `
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 8px;
+        `;
+
+        fotoContainer.appendChild(img);
+        fotoContainer.appendChild(zoomIcon);
+        gridFotos.appendChild(fotoContainer);
+    });
+
+    galeriaDiv.appendChild(gridFotos);
+
+    // Inserir a galeria ANTES das assinaturas (na PRIMEIRA página)
+    const assinaturas = document.getElementById('template-assinaturas');
+    if (assinaturas && assinaturas.parentNode) {
+        assinaturas.parentNode.insertBefore(galeriaDiv, assinaturas);
+    }
 }
 
 function gerarPDFResumo() {
