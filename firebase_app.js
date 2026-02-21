@@ -78,6 +78,8 @@ export async function salvarChecklist(checklist) {
         const dados = {
             ...checklist,
             oficina_id: getOficinaId(),
+            criado_em: checklist.data_criacao || new Date().toISOString(),
+            atualizado_em: new Date().toISOString(),
             created_at: serverTimestamp(),
             updated_at: serverTimestamp()
         };
@@ -127,6 +129,7 @@ async function atualizarIndiceVeiculo(checklist) {
             placa,
             ultima_visita: checklist.data_criacao,
             historico_ids: arrayUnion(checklist.id),
+            atualizado_em: new Date().toISOString(),
             updated_at: serverTimestamp()
         }, { merge: true });
 
@@ -160,6 +163,18 @@ export async function buscarChecklistsMes(ano, mes, limite = 20) {
 }
 
 // ================================
+// ✅ NOVA FUNÇÃO - MÊS ATUAL
+// ================================
+export async function buscarChecklistsMesAtual() {
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = agora.getMonth() + 1;
+    
+    console.log(`📅 Buscando checklists de ${mes}/${ano}`);
+    return buscarChecklistsMes(ano, mes, 100);
+}
+
+// ================================
 // 🔧 COMPATIBILIDADE CHECKLIST.JS
 // ================================
 export async function salvarNoFirebase(checklist) {
@@ -169,9 +184,22 @@ export async function salvarNoFirebase(checklist) {
 
 export async function buscarChecklistsNuvem() {
     const agora = new Date();
-    return buscarChecklistsMes(
-        agora.getFullYear(),
-        agora.getMonth() + 1,
-        100
+    const periodos = [
+        { ano: agora.getFullYear(), mes: agora.getMonth() + 1 },
+        { ano: new Date(agora.getFullYear(), agora.getMonth() - 1, 1).getFullYear(), mes: new Date(agora.getFullYear(), agora.getMonth() - 1, 1).getMonth() + 1 }
+    ];
+
+    const listas = await Promise.all(
+        periodos.map(({ ano, mes }) => buscarChecklistsMes(ano, mes, 100))
+    );
+
+    const mapa = new Map();
+    listas.flat().forEach((item) => {
+        if (!item?.id) return;
+        mapa.set(String(item.id), item);
+    });
+
+    return Array.from(mapa.values()).sort((a, b) =>
+        new Date(b.data_criacao || 0) - new Date(a.data_criacao || 0)
     );
 }
